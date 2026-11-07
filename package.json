@@ -1,0 +1,104 @@
+{
+    "name": "react-native-back-gesture",
+    "version": "0.0.0-semantically-released",
+    "description": "Android predictive back gesture animations for React Native, with Reanimated progress.",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "react-native": "./src/index.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "react-native": "./src/index.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "default": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "files": [
+        "dist",
+        "src",
+        "API.md",
+        "android/build.gradle",
+        "android/src",
+        "react-native.config.js"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/felipe-software/react-native-back-gesture.git"
+    },
+    "bugs": {
+        "url": "https://github.com/felipe-software/react-native-back-gesture/issues"
+    },
+    "homepage": "https://github.com/felipe-software/react-native-back-gesture#readme",
+    "keywords": [
+        "react-native",
+        "android",
+        "predictive-back",
+        "back-gesture",
+        "reanimated",
+        "expo-router",
+        "react-navigation"
+    ],
+    "sideEffects": false,
+    "codegenConfig": {
+        "name": "RNBackGestureSpec",
+        "type": "components",
+        "jsSrcsDir": "src/specs",
+        "android": {
+            "javaPackageName": "com.felipesoftware.backgesture"
+        }
+    },
+    "scripts": {
+        "build": "tsdown",
+        "typecheck": "tsc --noEmit",
+        "typecheck:tests": "tsc --noEmit -p tsconfig.tests.json",
+        "test": "bun test tests",
+        "format": "prettier --check src tests example/src example-react-navigation/src",
+        "example": "bun run --cwd example start",
+        "example:android": "bun run --cwd example android",
+        "example-react-navigation": "bun run --cwd example-react-navigation start",
+        "example-react-navigation:android": "bun run --cwd example-react-navigation android",
+        "prepublishOnly": "bun run build",
+        "release": "semantic-release",
+        "release:dry-run": "semantic-release --dry-run"
+    },
+    "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-native": ">=0.76.0",
+        "react-native-reanimated": ">=3.16.0 <5.0.0",
+        "react-native-screens": ">=4.0.0"
+    },
+    "devDependencies": {
+        "@semantic-release/commit-analyzer": "^13.0.1",
+        "@semantic-release/github": "^12.0.9",
+        "@semantic-release/npm": "^13.1.5",
+        "@semantic-release/release-notes-generator": "^14.1.1",
+        "@testing-library/react-native": "14.0.1",
+        "@types/bun": "1.3.14",
+        "@types/react": "~19.2.2",
+        "conventional-changelog-conventionalcommits": "^10.2.1",
+        "prettier": "^3.6.2",
+        "react": "19.2.3",
+        "react-native": "0.86.3",
+        "react-native-reanimated": "4.5.1",
+        "react-native-screens": "4.26.2",
+        "react-native-worklets": "0.10.1",
+        "semantic-release": "^25.0.5",
+        "test-renderer": "1.2.0",
+        "tsdown": "^0.22.14",
+        "typescript": "~6.0.3"
+    },
+    "workspaces": [
+        "example",
+        "example-react-navigation"
+    ],
+    "engines": {
+        "node": ">=18"
+    },
+    "license": "MIT",
+    "private": false,
+    "packageManager": "bun@1.3.14"
+}

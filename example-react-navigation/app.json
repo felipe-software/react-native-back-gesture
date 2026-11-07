@@ -1,0 +1,16 @@
+{
+    "expo": {
+        "name": "Back Gesture RN",
+        "slug": "react-native-back-gesture-example-react-navigation",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "light",
+        "ios": {
+            "bundleIdentifier": "com.felipesoftware.backgesture.reactnavigation"
+        },
+        "android": {
+            "predictiveBackGestureEnabled": true,
+            "package": "com.felipesoftware.backgesture.reactnavigation"
+        }
+    }
+}
