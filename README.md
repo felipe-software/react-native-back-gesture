@@ -10,7 +10,7 @@ Android predictive back for React Native. While the user swipes back, pushed scr
 
 ## Features
 
-- Predictive back for native stack screens from Expo Router and React Navigation (anything built on `react-native-screens`): a slide by default, or Android's scale animation.
+- Predictive back for native stack screens from Expo Router and React Navigation (anything built on `react-native-screens`): a slide by default, or an iOS-style, card, shared axis or scale animation.
 - Material sheet animation for bottom sheets backed by `BottomSheetBehavior`, including `react-native-screens` form sheets.
 - `useBackGesture` for your own UI: a custom sheet, modal, drawer or pager gets the gesture progress as a Reanimated `SharedValue`, updated on the UI thread.
 - The system back-to-home animation on the screens where back should leave the app.
@@ -135,10 +135,21 @@ Stack screens slide away with the gesture by default. Pick another animation wit
 | --- | --- |
 | `"slide"` (default) | Moves sideways with the gesture, revealing the previous screen under a fading scrim. |
 | `"scale"` | Shrinks, rounds its corners and follows the finger, like Android's own back-to-previous-screen animation. |
+| `"ios"` | Copies iOS: follows the finger one to one while the previous screen slides in from 30% to the side under a light dim, then settles with a spring. |
+| `"card"` | Slides away while the previous screen comes forward from slightly smaller, with rounded corners over black. |
+| `"shared-axis"` | Material's shared axis: both screens shift 30dp toward the finger while they cross-fade. |
 | `"none"` | Nothing until the gesture is committed; then React Native pops the screen as usual. |
 
 ```tsx
 <BackGestureProvider stackAnimation="scale">
+```
+
+`"ios"` matches `react-native-screens`' `ios_from_right` animation, so set both to make pushes and back-button pops look the same as the gesture:
+
+```tsx
+<BackGestureProvider stackAnimation="ios">
+    <Stack screenOptions={{ animation: "ios_from_right" }} />
+</BackGestureProvider>
 ```
 
 If you'd rather animate a native sheet yourself, turn the built-in sheet animation off and drive it from `useBackGesture`:

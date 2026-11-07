@@ -4,7 +4,8 @@ import type { SharedValue } from "react-native-reanimated";
 
 export type BackGestureEdge = "left" | "right";
 
-export type BackGestureStackAnimation = "slide" | "scale" | "none";
+export type BackGestureStackAnimation =
+    "slide" | "scale" | "ios" | "card" | "shared-axis" | "none";
 
 export interface BackGesture {
     progress: SharedValue<number>;

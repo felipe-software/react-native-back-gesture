@@ -3,11 +3,8 @@ package com.felipesoftware.backgesture
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
-import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.Interpolator
 import android.view.animation.PathInterpolator
@@ -18,16 +15,16 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.swmansion.rnscreens.Screen
 import com.swmansion.rnscreens.ScreenStack
 
-internal const val SCRIM_ALPHA = 51
-private const val CANCEL_DURATION_MS = 180L
-private const val FINISH_DURATION_MS = 220L
+internal const val SCRIM_DIM = 0.2f
+internal const val FINISH_DURATION_MS = 220L
+internal const val CANCEL_DURATION_MS = 180L
 private const val POP_TIMEOUT_MS = 1000L
 private const val SHEET_RESET_DELAY_MS = 500L
 
 // The curve Android's own cross-activity back animation applies to gesture progress.
 internal val GESTURE_CURVE: Interpolator = PathInterpolator(0.1f, 0.1f, 0f, 1f)
-private val FINISH_CURVE: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
-private val CANCEL_CURVE: Interpolator = DecelerateInterpolator()
+internal val FINISH_CURVE: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
+internal val CANCEL_CURVE: Interpolator = DecelerateInterpolator()
 
 internal interface BackAnimation {
   fun update(event: BackEventCompat)
@@ -94,49 +91,36 @@ internal class SheetBackAnimation(
 internal fun ScreenStack.topIndex(): Int = fragments.indexOfLast { it.screen === topScreen }
 
 internal class StackBackAnimation private constructor(
-  private val stack: ScreenStack,
+  private val scene: StackScene,
   private val topScreen: Screen,
-  private val top: View,
   private val below: Fragment,
+  private val attachedBelow: Boolean,
   private val fragmentManager: FragmentManager,
-  private val direction: Float,
   private val motion: StackMotion,
-  start: BackEventCompat,
 ) : BackAnimation {
-  private val attachedBelow = !below.isAdded
-  private val scrim = ColorDrawable(Color.BLACK)
   private val mainHandler = Handler(Looper.getMainLooper())
   private var progress = 0f
-  private var touchY = start.touchY
+  private var touchY = scene.startTouchY
   private var settling: ValueAnimator? = null
   private var awaitingPop = false
 
   init {
-    // A pushed page detaches the one under it, so bring it back only for as long as the gesture needs it.
-    if (attachedBelow) {
-      fragmentManager
-        .beginTransaction()
-        .setReorderingAllowed(true)
-        .add(stack.id, below)
-        .commitNowAllowingStateLoss()
-    }
-    scrim.alpha = motion.scrimAlpha(0f)
-    below.view?.foreground = scrim
-    top.bringToFront()
+    scene.begin()
     motion.begin()
+    motion.render(progress, touchY)
   }
 
   override fun update(event: BackEventCompat) {
     progress = motion.progressOf(event)
     touchY = event.touchY
-    applyProgress()
+    motion.render(progress, touchY)
   }
 
   override fun cancel() {
     val from = progress
-    settling = animate(CANCEL_DURATION_MS, CANCEL_CURVE, onEnd = ::restore) { fraction ->
+    settling = animate(motion.cancelDurationMs, motion.cancelCurve, onEnd = ::restore) { fraction ->
       progress = from * (1f - fraction)
-      applyProgress()
+      motion.render(progress, touchY)
     }
   }
 
@@ -144,50 +128,27 @@ internal class StackBackAnimation private constructor(
     settling?.end()
   }
 
-  fun isAwaitingPop() = awaitingPop && stack.topScreen === topScreen
+  fun isAwaitingPop() = awaitingPop && scene.stack.topScreen === topScreen
 
   override fun finish(onDone: () -> Unit) {
-    val fromX = top.translationX
-    val toX = direction * top.width
-    val fromScrim = scrim.alpha
+    val from = progress
     awaitingPop = true
-    animate(FINISH_DURATION_MS, FINISH_CURVE, onEnd = {
-      below.view?.foreground = null
+    animate(motion.finishDurationMs, motion.finishCurve, onEnd = {
+      scene.releaseBelow()
       onDone()
       mainHandler.postDelayed(::restoreIfNotPopped, POP_TIMEOUT_MS)
-    }) { fraction ->
-      top.translationX = fromX + (toX - fromX) * fraction
-      scrim.alpha = (fromScrim * (1f - fraction)).toInt()
-      motion.finishFrame(fraction)
-    }
-  }
-
-  private fun applyProgress() {
-    motion.apply(progress, touchY)
-    scrim.alpha = motion.scrimAlpha(progress)
+    }) { fraction -> motion.finishFrame(from, fraction, touchY) }
   }
 
   private fun restoreIfNotPopped() {
     awaitingPop = false
-    if (stack.topScreen === topScreen) restore()
+    if (scene.stack.topScreen === topScreen) restore()
   }
 
   private fun restore() {
     settling = null
-    top.scaleX = 1f
-    top.scaleY = 1f
-    top.translationX = 0f
-    top.translationY = 0f
-    top.alpha = 1f
-    motion.reset()
-    below.view?.foreground = null
-    if (attachedBelow && below.isAdded && !fragmentManager.isDestroyed) {
-      fragmentManager
-        .beginTransaction()
-        .setReorderingAllowed(true)
-        .remove(below)
-        .commitNowAllowingStateLoss()
-    }
+    scene.reset()
+    if (attachedBelow && below.isAdded && !fragmentManager.isDestroyed) detach(fragmentManager, below)
   }
 
   companion object {
@@ -199,15 +160,41 @@ internal class StackBackAnimation private constructor(
       val below = stack.fragments[topIndex - 1].fragment
       val pushOrPopRunning = top.animation?.hasEnded() == false || (below.view != null && !below.isAdded)
       if (pushOrPopRunning) return null
-      val direction = if (start.swipeEdge == BackEventCompat.EDGE_RIGHT) -1f else 1f
-      val motion = when (style) {
-        StackAnimationStyle.SLIDE -> SlideMotion(top, direction)
-        StackAnimationStyle.SCALE -> ScaleMotion(top, direction, start.touchY)
-      }
       val fragmentManager = wrapper.fragment.parentFragmentManager
-      return StackBackAnimation(stack, wrapper.screen, top, below, fragmentManager, direction, motion, start)
+      val attachedBelow = !below.isAdded
+      // A pushed page detaches the one under it, so bring it back only for as long as the gesture needs it.
+      if (attachedBelow) {
+        fragmentManager
+          .beginTransaction()
+          .setReorderingAllowed(true)
+          .add(stack.id, below)
+          .commitNowAllowingStateLoss()
+      }
+      val belowView = below.view
+      if (belowView == null) {
+        if (attachedBelow) detach(fragmentManager, below)
+        return null
+      }
+      val direction = if (start.swipeEdge == BackEventCompat.EDGE_RIGHT) -1f else 1f
+      val scene = StackScene(stack, top, belowView, direction, start.touchY)
+      val motion = when (style) {
+        StackAnimationStyle.SLIDE -> SlideMotion(scene)
+        StackAnimationStyle.SCALE -> ScaleMotion(scene)
+        StackAnimationStyle.IOS -> IosMotion(scene)
+        StackAnimationStyle.CARD -> CardMotion(scene)
+        StackAnimationStyle.SHARED_AXIS -> SharedAxisMotion(scene)
+      }
+      return StackBackAnimation(scene, wrapper.screen, below, attachedBelow, fragmentManager, motion)
     }
   }
+}
+
+private fun detach(fragmentManager: FragmentManager, fragment: Fragment) {
+  fragmentManager
+    .beginTransaction()
+    .setReorderingAllowed(true)
+    .remove(fragment)
+    .commitNowAllowingStateLoss()
 }
 
 private fun animate(

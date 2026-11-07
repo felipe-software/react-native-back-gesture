@@ -25,6 +25,21 @@ const STACK_ANIMATIONS: {
         detail: "Android's shrink, with rounded corners",
     },
     {
+        value: "ios",
+        title: "iOS",
+        detail: "Like iOS, the previous screen trails behind",
+    },
+    {
+        value: "card",
+        title: "Card",
+        detail: "The previous screen comes forward from behind",
+    },
+    {
+        value: "shared-axis",
+        title: "Shared axis",
+        detail: "Both screens shift a little and cross-fade",
+    },
+    {
         value: "none",
         title: "None",
         detail: "Back still works, without a gesture animation",

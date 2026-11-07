@@ -14,7 +14,10 @@ type BackGestureNativeEvent = Readonly<{
 export interface NativeProps extends ViewProps {
     interceptsBack?: boolean;
     systemBackAllowed?: boolean;
-    stackAnimation?: WithDefault<"slide" | "scale" | "none", "slide">;
+    stackAnimation?: WithDefault<
+        "slide" | "scale" | "ios" | "card" | "shared-axis" | "none",
+        "slide"
+    >;
     sheetAnimation?: WithDefault<boolean, true>;
     onBackStarted?: DirectEventHandler<BackGestureNativeEvent>;
     onBackProgressed?: DirectEventHandler<BackGestureNativeEvent>;

@@ -34,6 +34,9 @@ class BackGestureViewManager :
   override fun setStackAnimation(view: BackGestureView, value: String?) {
     view.stackAnimation = when (value) {
       "scale" -> StackAnimationStyle.SCALE
+      "ios" -> StackAnimationStyle.IOS
+      "card" -> StackAnimationStyle.CARD
+      "shared-axis" -> StackAnimationStyle.SHARED_AXIS
       "none" -> null
       else -> StackAnimationStyle.SLIDE
     }

@@ -10,7 +10,7 @@ Wrap the app once, above the navigator.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | — | The app. |
-| `stackAnimation` | `"slide" \| "scale" \| "none"` | `"slide"` | How native stack screens (`react-native-screens`) follow the gesture: a slide, Android's scale, or nothing. |
+| `stackAnimation` | `"slide" \| "scale" \| "ios" \| "card" \| "shared-axis" \| "none"` | `"slide"` | How native stack screens (`react-native-screens`) follow the gesture. The [README](README.md#choosing-the-animations) describes each one. |
 | `sheetAnimation` | `boolean` | `true` | Plays the Material back animation on visible native bottom sheets. |
 | `style` | `StyleProp<ViewStyle>` | `{ flex: 1 }` | Style of the wrapping view. |
 
@@ -43,7 +43,8 @@ Both shared values are updated on the UI thread, without a round trip through Ja
 ```ts
 type BackGestureEdge = "left" | "right";
 
-type BackGestureStackAnimation = "slide" | "scale" | "none";
+type BackGestureStackAnimation =
+    "slide" | "scale" | "ios" | "card" | "shared-axis" | "none";
 
 interface BackGesture {
     progress: SharedValue<number>;
