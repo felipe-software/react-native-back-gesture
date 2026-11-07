@@ -1,18 +1,17 @@
-package com.felipesoftware.backgesture
+package com.felipesoftware.backgesture.view
 
 import android.os.Build
 import androidx.activity.ComponentActivity
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.views.view.ReactViewGroup
+import com.felipesoftware.backgesture.events.BackGestureEvent
+import com.felipesoftware.backgesture.events.BackGestureEventType
+import com.felipesoftware.backgesture.router.BackRouter
+import com.felipesoftware.backgesture.router.BackRouterOptions
 
-class BackGestureView(
-  private val reactContext: ThemedReactContext,
-) : ReactViewGroup(reactContext),
-  BackRouterHost {
-  override var interceptsBack = false
-  override var stackAnimation: StackAnimationStyle? = StackAnimationStyle.SLIDE
-  override var sheetAnimation = true
+class BackGestureView(private val reactContext: ThemedReactContext) : ReactViewGroup(reactContext) {
+  internal val options = BackRouterOptions()
   private var router: BackRouter? = null
 
   var systemBackAllowed = false
@@ -27,7 +26,7 @@ class BackGestureView(
     // to React Native. Gesture progress only arrives from Android 14.
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
     val activity = reactContext.currentActivity as? ComponentActivity ?: return
-    router = BackRouter(activity, this).also { it.setSystemBackAllowed(systemBackAllowed) }
+    router = BackRouter(activity, options, ::emit).also { it.setSystemBackAllowed(systemBackAllowed) }
   }
 
   override fun onDetachedFromWindow() {
@@ -38,10 +37,8 @@ class BackGestureView(
 
   // getEventDispatcher(context) only exists from React Native 0.85, and 0.76 is still supported.
   @Suppress("DEPRECATION")
-  override fun emit(name: String, progress: Float, swipeEdge: Int) {
-    val surfaceId = UIManagerHelper.getSurfaceId(this)
-    UIManagerHelper
-      .getEventDispatcherForReactTag(reactContext, id)
-      ?.dispatchEvent(BackGestureEvent(surfaceId, id, name, progress, swipeEdge))
+  private fun emit(type: BackGestureEventType, progress: Float, swipeEdge: Int) {
+    val event = BackGestureEvent(UIManagerHelper.getSurfaceId(this), id, type, progress, swipeEdge)
+    UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)?.dispatchEvent(event)
   }
 }

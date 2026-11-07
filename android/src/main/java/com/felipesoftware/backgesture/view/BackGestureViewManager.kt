@@ -1,4 +1,4 @@
-package com.felipesoftware.backgesture
+package com.felipesoftware.backgesture.view
 
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
@@ -7,11 +7,11 @@ import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.BackGestureViewManagerDelegate
 import com.facebook.react.viewmanagers.BackGestureViewManagerInterface
+import com.felipesoftware.backgesture.animations.stack.StackAnimationStyle
+import com.felipesoftware.backgesture.events.BackGestureEventType
 
 @ReactModule(name = BackGestureViewManager.NAME)
-class BackGestureViewManager :
-  ViewGroupManager<BackGestureView>(),
-  BackGestureViewManagerInterface<BackGestureView> {
+class BackGestureViewManager : ViewGroupManager<BackGestureView>(), BackGestureViewManagerInterface<BackGestureView> {
   private val delegate = BackGestureViewManagerDelegate(this)
 
   override fun getDelegate(): ViewManagerDelegate<BackGestureView> = delegate
@@ -22,7 +22,7 @@ class BackGestureViewManager :
 
   @ReactProp(name = "interceptsBack")
   override fun setInterceptsBack(view: BackGestureView, value: Boolean) {
-    view.interceptsBack = value
+    view.options.interceptsBack = value
   }
 
   @ReactProp(name = "systemBackAllowed")
@@ -32,25 +32,16 @@ class BackGestureViewManager :
 
   @ReactProp(name = "stackAnimation")
   override fun setStackAnimation(view: BackGestureView, value: String?) {
-    view.stackAnimation = when (value) {
-      "scale" -> StackAnimationStyle.SCALE
-      "ios" -> StackAnimationStyle.IOS
-      "card" -> StackAnimationStyle.CARD
-      "shared-axis" -> StackAnimationStyle.SHARED_AXIS
-      "none" -> null
-      else -> StackAnimationStyle.SLIDE
-    }
+    view.options.stackAnimation = StackAnimationStyle.fromProp(value)
   }
 
   @ReactProp(name = "sheetAnimation", defaultBoolean = true)
   override fun setSheetAnimation(view: BackGestureView, value: Boolean) {
-    view.sheetAnimation = value
+    view.options.sheetAnimation = value
   }
 
   override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> =
-    BACK_EVENT_NAMES.associateWith { name ->
-      mapOf("registrationName" to "on" + name.removePrefix("top"))
-    }
+    BackGestureEventType.entries.associate { it.eventName to mapOf("registrationName" to it.registrationName) }
 
   companion object {
     const val NAME = "BackGestureView"
