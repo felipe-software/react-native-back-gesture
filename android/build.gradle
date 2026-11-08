@@ -1,0 +1,39 @@
+def safeExtGet(prop, fallback) {
+  return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "com.facebook.react"
+
+android {
+  namespace "com.felipesoftware.backgesture"
+  compileSdkVersion safeExtGet("compileSdkVersion", 36)
+
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 24)
+    targetSdkVersion safeExtGet("targetSdkVersion", 36)
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += ["build/generated/source/codegen/java"]
+    }
+  }
+}
+
+react {
+  jsRootDir = file("../src/")
+  libraryName = "RNBackGestureSpec"
+  codegenJavaPackageName = "com.felipesoftware.backgesture"
+}
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  implementation project(":react-native-screens")
+  implementation "androidx.activity:activity:1.8.1"
+  implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
+  implementation "androidx.fragment:fragment:1.8.9"
+  // react-native-screens already ships Material at runtime; compiling against it adds nothing to the app.
+  compileOnly "com.google.android.material:material:1.13.0"
+}

@@ -1,0 +1,18 @@
+{
+    "expo": {
+        "name": "Back Gesture",
+        "slug": "react-native-back-gesture-example",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "scheme": "backgesture",
+        "userInterfaceStyle": "light",
+        "ios": {
+            "bundleIdentifier": "com.felipesoftware.backgesture.example"
+        },
+        "android": {
+            "predictiveBackGestureEnabled": true,
+            "package": "com.felipesoftware.backgesture.example"
+        },
+        "plugins": ["expo-router"]
+    }
+}
