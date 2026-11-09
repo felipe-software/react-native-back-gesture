@@ -83,7 +83,6 @@ export function useBackGesture({
 
     useEffect(() => {
         if (!context) return undefined;
-        // SAFETY: useEvent is typed as a plain function, but returns its handler object at runtime.
         return context.attach(
             eventHandler as unknown as BackGestureEventHandler,
         );

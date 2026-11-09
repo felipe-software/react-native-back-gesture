@@ -1,5 +1,3 @@
-<img src="assets/icon.svg" width="64" height="64" alt="">
-
 # react-native-back-gesture
 
 [![npm version](https://img.shields.io/npm/v/react-native-back-gesture?style=flat-square)](https://www.npmjs.com/package/react-native-back-gesture) [![license](https://img.shields.io/npm/l/react-native-back-gesture?style=flat-square)](https://www.npmjs.com/package/react-native-back-gesture)
@@ -11,15 +9,17 @@
 npm install react-native-back-gesture
 ```
 
-Needs `react-native-reanimated`, `react-native-screens` and the New Architecture. Rebuild the native app afterwards, then opt in to predictive back:
+Needs `react-native-reanimated`, `react-native-screens` and the New Architecture. Rebuild the native app afterwards, then opt in to predictive back.
 
-```jsonc
-// app.json (Expo)
+Expo, in `app.json`:
+
+```json
 { "expo": { "android": { "predictiveBackGestureEnabled": true } } }
 ```
 
+Bare React Native, in `AndroidManifest.xml`:
+
 ```xml
-<!-- AndroidManifest.xml (bare React Native) -->
 <application android:enableOnBackInvokedCallback="true">
 ```
 
@@ -40,45 +40,41 @@ export default function RootLayout() {
 }
 ```
 
+With React Navigation:
+
 ```tsx
-// React Navigation
 <BackGestureProvider>
-    <NavigationContainer>{/* … */}</NavigationContainer>
+    <NavigationContainer>
+        <RootStack />
+    </NavigationContainer>
 </BackGestureProvider>
 ```
 
 ### Animations
 
 ```ts
-type StackAnimation =
-    | "slide"       // default: the top screen slides away
-    | "scale"       // shrinks with the finger, like Android
-    | "ios"         // the previous screen trails 30% behind
-    | "card"        // the previous screen comes forward from behind
-    | "shared-axis" // both screens shift and cross-fade
-    | "none";
+type BackGestureStackAnimation = "slide" | "scale" | "ios" | "card" | "shared-axis" | "none";
 ```
 
 ```tsx
-<BackGestureProvider
-    stackAnimation="ios"
-    sheetAnimation={false} // animate native sheets yourself
->
+<BackGestureProvider stackAnimation="ios" sheetAnimation={false}>
     <Stack screenOptions={{ animation: "ios_from_right" }} />
 </BackGestureProvider>
 ```
 
+`"slide"` is the default. [API.md](API.md#stack-animations) describes each one.
+
 ### Your own UI
 
 ```tsx
+import type { ReactNode } from "react";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useBackGesture } from "react-native-back-gesture";
 
-function Sheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-    const { progress, edge } = useBackGesture({
-        enabled: open, // takes over back gestures while true
-        onBack: onClose, // runs when the user commits the gesture
-    });
+type SheetProps = { open: boolean; onClose: () => void; children: ReactNode };
+
+function Sheet({ open, onClose, children }: SheetProps) {
+    const { progress, edge } = useBackGesture({ enabled: open, onBack: onClose });
 
     const style = useAnimatedStyle(() => {
         const direction = edge.value === "right" ? -1 : 1;
@@ -90,12 +86,13 @@ function Sheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         };
     });
 
-    return <Animated.View style={style}>{/* … */}</Animated.View>;
+    return <Animated.View style={style}>{children}</Animated.View>;
 }
 ```
 
+On screens that stay mounted under others:
+
 ```tsx
-// Only while this screen is on top
 const focused = useIsFocused();
 useBackGesture({ enabled: focused && menuOpen, onBack: closeMenu });
 ```
@@ -103,7 +100,6 @@ useBackGesture({ enabled: focused && menuOpen, onBack: closeMenu });
 ### Closing the app
 
 ```tsx
-// Android's back-to-home animation on the home screen
 useSystemBackAllowed(usePathname() === "/");
 ```
 
@@ -124,8 +120,8 @@ Full reference: **[API.md](API.md)**.
 
 ```sh
 bun install
-bun run example:android                  # Expo Router
-bun run example-react-navigation:android # React Navigation
+bun run example:android
+bun run example-react-navigation:android
 ```
 
 ## License

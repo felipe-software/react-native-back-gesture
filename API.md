@@ -10,9 +10,20 @@ Wrap the app once, above the navigator.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `children` | `ReactNode` | — | The app. |
-| `stackAnimation` | `"slide" \| "scale" \| "ios" \| "card" \| "shared-axis" \| "none"` | `"slide"` | How native stack screens (`react-native-screens`) follow the gesture. The [README](README.md#animations) describes each one. |
+| `stackAnimation` | `"slide" \| "scale" \| "ios" \| "card" \| "shared-axis" \| "none"` | `"slide"` | How native stack screens (`react-native-screens`) follow the gesture. See [Stack animations](#stack-animations). |
 | `sheetAnimation` | `boolean` | `true` | Plays the Material back animation on visible native bottom sheets. |
 | `style` | `StyleProp<ViewStyle>` | `{ flex: 1 }` | Style of the wrapping view. |
+
+### Stack animations
+
+| `stackAnimation` | What happens |
+| --- | --- |
+| `"slide"` (default) | The top screen moves sideways with the gesture, revealing the previous screen under a fading scrim. |
+| `"scale"` | The top screen shrinks, rounds its corners and follows the finger, like Android's own back-to-previous-screen animation. |
+| `"ios"` | Like iOS: the top screen follows the finger one to one while the previous screen slides in from 30% to the side under a light dim, then settles with a spring. |
+| `"card"` | The top screen slides away while the previous screen comes forward from slightly smaller, with rounded corners over black. |
+| `"shared-axis"` | Material's shared axis: both screens shift 30dp toward the finger while they cross-fade. |
+| `"none"` | No animation until the gesture is committed; then React Native pops the screen as usual. |
 
 `"ios"` matches `react-native-screens`' `ios_from_right` animation. Set both so pushes and back-button pops look like the gesture:
 

@@ -19,7 +19,6 @@ internal fun View.findVisibleSheet(): BottomSheetBehavior<*>? {
 internal fun View.findVisibleStack(): ScreenStack? {
   if (visibility != View.VISIBLE) return null
   firstFromTop { it.findVisibleStack() }?.let { return it }
-  // An inactive tab keeps its pushed pages mounted, just translated off screen.
   return (this as? ScreenStack)?.takeIf { it.topIndex() > 0 && it.getGlobalVisibleRect(Rect()) }
 }
 

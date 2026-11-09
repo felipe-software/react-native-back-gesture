@@ -16,8 +16,6 @@ internal class SheetBackAnimation(private val sheet: BottomSheetBehavior<*>, sta
 
   override fun cancel() = sheet.cancelBackProgress()
 
-  // React Native's back handling dismisses the sheet. The shrink is undone once the sheet has slid away,
-  // so it doesn't snap back to full size first.
   override fun finish(onDone: () -> Unit) {
     onDone()
     Handler(Looper.getMainLooper()).postDelayed(sheet::cancelBackProgress, RESET_DELAY_MS)

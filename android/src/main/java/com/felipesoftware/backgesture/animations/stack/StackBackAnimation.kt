@@ -81,7 +81,6 @@ internal class StackBackAnimation private constructor(
       if (pushOrPopRunning) return null
       val fragmentManager = wrapper.fragment.parentFragmentManager
       val attachedBelow = !below.isAdded
-      // A pushed page detaches the one under it, so bring it back only for as long as the gesture needs it.
       if (attachedBelow) fragmentManager.addNow(stack.id, below)
       val belowView = below.view
       if (belowView == null) {
