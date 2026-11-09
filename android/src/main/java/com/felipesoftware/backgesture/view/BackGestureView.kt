@@ -22,8 +22,6 @@ class BackGestureView(private val reactContext: ThemedReactContext) : ReactViewG
 
   override fun onAttachedToWindow() {
     super.onAttachedToWindow()
-    // From Android 13, opting into predictive back stops onBackPressed, so the router has to forward back
-    // to React Native. Gesture progress only arrives from Android 14.
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
     val activity = reactContext.currentActivity as? ComponentActivity ?: return
     router = BackRouter(activity, options, ::emit).also { it.setSystemBackAllowed(systemBackAllowed) }
@@ -35,7 +33,6 @@ class BackGestureView(private val reactContext: ThemedReactContext) : ReactViewG
     super.onDetachedFromWindow()
   }
 
-  // getEventDispatcher(context) only exists from React Native 0.85, and 0.76 is still supported.
   @Suppress("DEPRECATION")
   private fun emit(type: BackGestureEventType, progress: Float, swipeEdge: Int) {
     val event = BackGestureEvent(UIManagerHelper.getSurfaceId(this), id, type, progress, swipeEdge)

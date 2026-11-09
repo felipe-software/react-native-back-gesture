@@ -9,7 +9,6 @@ import android.view.animation.PathInterpolator
 import androidx.activity.BackEventCompat
 import kotlin.math.exp
 
-// The curve Android's own cross-activity back animation applies to gesture progress.
 internal val GESTURE_CURVE: Interpolator = PathInterpolator(0.1f, 0.1f, 0f, 1f)
 internal val STANDARD_CURVE: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
 

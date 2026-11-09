@@ -14,7 +14,6 @@ import com.felipesoftware.backgesture.extensions.findVisibleStack
 import com.felipesoftware.backgesture.extensions.reactBackCallback
 import com.felipesoftware.backgesture.extensions.reactRegistersBackCallback
 
-// BackEvent.EDGE_NONE, sent by 3-button navigation on API 36; the androidx version in use has no constant for it.
 private const val EDGE_NONE = 2
 
 internal class BackRouterOptions {
@@ -30,7 +29,6 @@ internal class BackRouter(
 ) : OnBackPressedCallback(true) {
   private val reactCallback = activity.reactBackCallback()
 
-  // React Native registers its callback only on API 36; without it, forwarding exits the app instead of reaching JS.
   private val registeredReactCallback = reactCallback?.takeUnless { activity.reactRegistersBackCallback }
   private var animation: BackAnimation? = null
   private var lastStackAnimation: StackBackAnimation? = null
@@ -66,7 +64,6 @@ internal class BackRouter(
     reactCallback?.isEnabled = true
   }
 
-  // The system only plays its back-to-home animation while no callback is enabled, including React Native's.
   fun setSystemBackAllowed(allowed: Boolean) {
     systemBackAllowed = allowed && reactCallback != null
     isEnabled = !systemBackAllowed
